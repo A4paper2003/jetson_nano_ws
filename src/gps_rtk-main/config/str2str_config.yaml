@@ -1,0 +1,7 @@
+str2str:
+  ntrip_address: "ntrip.geodetic.gov.hk"  # NTRIP server address
+  ntrip_port: 2101                        # NTRIP server port
+  mountpoint: "HKCL_32"                   # NTRIP server mountpoint
+  device: "tty_f9p"                # GNSS device (exclude '/dev/')
+  baudrate: 38400                        # GNSS device baud rate
+  debug: true                            # Set to true to enable debug output

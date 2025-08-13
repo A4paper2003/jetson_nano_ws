@@ -1,0 +1,11 @@
+<launch>
+    <!-- Load parameters from YAML for str2str and GNSS configuration -->
+    <rosparam file="$(find gps_rtk)/config/str2str_config.yaml" command="load" />
+    <rosparam file="$(find gps_rtk)/config/ntrip_config.yaml" command="load" />
+
+    <!-- Start str2str with parameters loaded from the YAML -->
+    <node name="str2str" pkg="gps_rtk" type="start_str2str.sh" output="screen" />
+
+    <!-- Start GNSS Data Reader Node with the config loaded -->
+    <node name="read_gnss" pkg="gps_rtk" type="gnss_processor.py" output="screen" />
+</launch>

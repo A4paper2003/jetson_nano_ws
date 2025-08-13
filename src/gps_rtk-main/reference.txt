@@ -1,0 +1,10 @@
+const double varH = pow(m.hAcc / 1000.0, 2);  // Horizontal variance (in meters^2)
+const double varV = pow(m.vAcc / 1000.0, 2);  // Vertical variance (in meters^2)
+
+// Set the diagonal elements of the covariance matrix
+fix_.position_covariance[0] = varH;  // Covariance for latitude
+fix_.position_covariance[4] = varH;  // Covariance for longitude
+fix_.position_covariance[8] = varV;  // Covariance for altitude
+
+// Set the covariance matrix type (diagonal covariance matrix)
+fix_.position_covariance_type = sensor_msgs::NavSatFix::COVARIANCE_TYPE_DIAGONAL_KNOWN;

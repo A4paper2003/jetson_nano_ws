@@ -1,0 +1,6 @@
+[submodule "src/FAST-LIVO2"]
+	path = src/FAST-LIVO2
+	url = git@github.com:A4paper2003/custom-fast-livo2.git
+[submodule "src/rpg_vikit"]
+	path = src/rpg_vikit
+	url = git@github.com:A4paper2003/rpg_vikit.git

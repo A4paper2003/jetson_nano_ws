@@ -1,0 +1,8 @@
+gnss:
+  port: "/dev/tty_f9p"         # F9P base station port
+  baudrate: 38400              # Baudrate for both GNSS modules
+  topic: "/gps/fix"            # ROS topic to publish NavSatFix messages
+  #f9h_port: "/dev/tty_f9h"     # F9H rover port
+  #f9h_baudrate: 38400          # Baudrate for F9H (same as F9P)
+  #heading_topic: "/gps/heading"  # ROS topic to publish heading information
+  debug: true                  # Enable or disable debug messages

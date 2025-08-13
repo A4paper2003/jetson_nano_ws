@@ -1,0 +1,23 @@
+# Ignore ROS Catkin build artifacts
+# These are generated locally when you compile
+build/
+devel/
+install/
+logs/
+
+# Ignore common temporary files
+*.swp
+*~
+*.pyc
+*.orig
+*.bak
+
+
+# Ignore IDE/Editor specific files
+.vscode/
+.idea/
+.project
+.cproject
+.settings/
+*.sublime-workspace
+*.sublime-project

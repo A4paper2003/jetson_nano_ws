@@ -1,0 +1,60 @@
+ARG ROS_DISTRO=noetic
+FROM ros:${ROS_DISTRO}-perception-focal
+
+# set ROS_DISTRO
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential wget ssh vim git python3-dev libboost-python-dev \
+    rtklib ros-$ROS_DISTRO-ublox-msgs python3-pip     
+
+    # libfmt-dev \
+    # && rm -rf /var/lib/apt/lists/*
+
+RUN pip3 install pyubx2 pyserial
+
+ENV NVIDIA_VISIBLE_DEVICES \
+${NVIDIA_VISIBLE_DEVICES:-all}
+
+ENV NVIDIA_DRIVER_CAPABILITIES \
+${NVIDIA_DRIVER_CAPABILITIES:+$NVIDIA_DRIVER_CAPABILITIES,}graphics
+
+
+ARG USERNAME=kodifly
+
+# Create a non-root user and set up the environment
+RUN useradd ${USERNAME} --create-home --shell /bin/bash  && \
+    echo ${USERNAME}':newpassword' | chpasswd && \
+    chown -R ${USERNAME}:${USERNAME} /home/${USERNAME} && \
+    chmod 777 /home/${USERNAME}
+
+# Update user
+RUN echo ${USERNAME} ALL=\(root\) NOPASSWD:ALL > /etc/sudoers.d/${USERNAME} \
+    && chmod 0440 /etc/sudoers.d/${USERNAME} \
+    && adduser ${USERNAME} video && adduser ${USERNAME} plugdev && adduser ${USERNAME} sudo
+
+
+# SSH stuff for git
+RUN mkdir -p /home/${USERNAME}/.ssh && chmod 777 /home/${USERNAME}/.ssh
+
+RUN --mount=type=secret,target=/run/secrets/host_ssh_key\
+    cp /run/secrets/host_ssh_key /home/${USERNAME}/.ssh/id_rsa
+
+RUN chown ${USERNAME}:${USERNAME} /home/${USERNAME}/.ssh/id_rsa
+RUN ssh-keyscan github.com >> /home/${USERNAME}/.ssh/known_hosts
+
+
+SHELL ["/bin/bash", "-c"]
+USER ${USERNAME}
+
+
+WORKDIR /home/${USERNAME}
+
+
+RUN echo "source /home/${USERNAME}/workspace/devel/setup.bash" >> /home/${USERNAME}/.bashrc
+WORKDIR /home/${USERNAME}/workspace
+
+# add user to groups for serial access
+RUN sudo usermod -a -G tty ${USERNAME} && \
+    sudo usermod -a -G dialout ${USERNAME}
+
+
+CMD ["/bin/bash"]

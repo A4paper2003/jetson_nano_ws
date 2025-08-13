@@ -1,0 +1,4 @@
+#!/bin/bash
+# This script starts str2str and handles termination signals
+
+
