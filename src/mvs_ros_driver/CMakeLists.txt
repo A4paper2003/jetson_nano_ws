@@ -20,12 +20,12 @@ find_package(catkin REQUIRED COMPONENTS
   sensor_msgs
   std_msgs
   rosbag
-  #dynamic_reconfigure
+  dynamic_reconfigure
 )
 
-#generate_dynamic_reconfigure_options(
-#  cfg/Camparam.cfg
-#)
+generate_dynamic_reconfigure_options(
+  cfg/Camparam.cfg
+)
 
 
 find_package(OpenCV)

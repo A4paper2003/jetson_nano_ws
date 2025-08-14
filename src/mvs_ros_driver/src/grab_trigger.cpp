@@ -13,8 +13,40 @@
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <signal.h>
+#include <mutex>
+#include <bitset> 
+
+#include <dynamic_reconfigure/server.h>
+#include <mvs_ros_driver/CamparamConfig.h>
 
 using namespace std;
+
+// For changing camera settings in Qt 
+static constexpr uint32_t LEVEL_EXPOSURE = 1 << 0;
+static constexpr uint32_t LEVEL_BRIGHT = 1 << 1;
+
+static std::mutex g_cam_mutex;
+static void *g_handle = nullptr;  
+void reconfigCb(mvs_ros_driver::CamparamConfig &config, uint32_t level)
+{
+    std::lock_guard<mutex> lk(g_cam_mutex);
+    ROS_INFO_STREAM("level biset is: " << std::bitset<32>(level)); 
+    if (level & LEVEL_EXPOSURE) {
+        ROS_INFO_STREAM("Exposure time set to: " << config.exposure_time_param);
+        MV_CC_SetExposureTime(g_handle, config.exposure_time_param);
+    }
+    if (level & LEVEL_BRIGHT) {
+        int return_status = MV_CC_SetIntValueEx(g_handle, "Brightness", config.brightness_param);
+        if (MV_OK == return_status)
+        {
+            ROS_INFO_STREAM("Brightness set to: " << config.brightness_param);
+        }
+        else
+        {
+            ROS_WARN_STREAM("Fail to set Brightness!");
+        }
+    }
+}
 
 struct time_stamp {
   int64_t high;
@@ -284,7 +316,11 @@ static void *WorkThread(void *pUser) {
 
   while (!exit_flag && ros::ok()) {
 
-    nRet = MV_CC_GetOneFrameTimeout(pUser, pData, stParam.nCurValue * 3, &stImageInfo, 1000);
+    // lock the mutex to ensure thread safety
+    {
+      std::lock_guard<mutex> lk(g_cam_mutex);
+      nRet = MV_CC_GetOneFrameTimeout(pUser, pData, stParam.nCurValue * 3, &stImageInfo, 1000);
+    }
     if (nRet == MV_OK) {
       
       ros::Time rcv_time;
@@ -572,6 +608,12 @@ int main(int argc, char **argv) {
     printf("thread create failed.ret = %d\n", nRet);
     return -1;
   }
+  
+  dynamic_reconfigure::Server<mvs_ros_driver::CamparamConfig> server;
+  dynamic_reconfigure::Server<mvs_ros_driver::CamparamConfig>::CallbackType f;
+  f = boost::bind(&reconfigCb, _1, _2);
+  // as long as the server lives, the node listens to reconfigure requests
+  server.setCallback(f);
 
   while (!exit_flag && ros::ok()) {
     ros::spinOnce();
